@@ -1,4 +1,4 @@
-# BDSP
-Bus Driver Scheduling Problem
+# Bus Driver Scheduling Problem
+
 
 This is a Python code for metaheuristic algorithms for Bus Driver Scheduling Problem.
