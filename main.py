@@ -1,14 +1,69 @@
 import numpy as np
+import time
 
-from input_reading import Instance
-from input_reading import read_solution
-from others import Algorithm
-from others import Solution
+from data import Instance, read_solution
+from algorithm import Algorithm, ConstructionAlgorithm, TabuSearch
+from solution import Solution
 import config as conf
 from IntervalVisualizer import IntervalVisualizer
 
-visualizer = IntervalVisualizer(axis=IntervalVisualizer.AXIS_HOURS)
 
+
+instance = Instance.read_data(conf.INSTANCE_SIZE, conf.INSTANCE_NUMBER)
+algorithm = Algorithm(instance)
+
+# ---------------------- #
+# CONSTRUCTIVE ALGORITHM #
+# ---------------------- # 
+start = time.process_time()
+initial_solution = ConstructionAlgorithm(instance).apply()
+duration = time.process_time() - start
+initial_solution.evaluate(instance)
+print(f'Finished execution in {duration} with value {initial_solution.value}')
+# initial_solution.print_objective()
+
+# -------------- #
+# READ FROM FILE #
+# -------------- # 
+
+# initial_solution = Solution.construct_solution(instance, read_solution(conf.NAME))
+# initial_solution.evaluate(instance)
+# solution.print_objective()
+
+
+
+# ----------- #
+# TABU SEARCH #
+# ----------- # 
+# Set verbosity. Verb = 0: no description
+verb = 0
+if verb != 0:
+    print('\n****************')
+    print('*   INSTANCE   *')
+    print('****************')
+    print('Number of legs =', len(instance.legs))
+    print('Number of employees =', len(initial_solution.employees))
+    print(f'Number of maximum iterations = {conf.MAX_ITER}')
+    print(f'Tabu tenure = {conf.TABU_LENGTH}')
+    print(f'Starting objective = {initial_solution.evaluation}')
+
+start = time.process_time()
+best_objective, best_solution = TabuSearch(instance).apply(initial_solution)
+duration = time.process_time() - start
+print(f'Finished execution in {duration} with value {best_objective}')
+
+final_solution = best_solution.removeEmptyEmployees()
+
+# final_solution.evaluate(instance)
+# final_solution.print_objective()
+# best_solution.print_to_file()
+
+
+
+# intervals = result.employees
+# visualizer = IntervalVisualizer(axis=IntervalVisualizer.AXIS_HOURS)
+# visualizer.create(intervals, 'Results', 'tour', hover, 'tour').show()
+# best_solution = best_solution.visualize_solution()
 
 def hover(interval):
     if getattr(interval, 'tour', None) == 'S':
@@ -53,44 +108,6 @@ def hover(interval):
                'Time: %{​​​​​start}​​​​​ - %{​​​​​end}​​​​​'
         string = string.replace('\u200b', '')
         return string
-
-
-instance = Instance.read_data(conf.INSTANCE_SIZE, conf.INSTANCE_NUMBER)
-
-# result = Algorithm(instance).constructive_algorithm()
-# result.evaluate(instance)
-# result = result.visualize_solution()
-# result.print_solution()
-# intervals = result.employees
-# visualizer.create(intervals, 'Results', 'tour', hover, 'tour').show()
-
-
-matrix = read_solution(conf.NAME)
-# matrix = np.array(matrix)
-# solution = Solution(matrix)
-solution = Solution.construct_solution(instance, matrix)
-solution.evaluate(instance)
-solution.print_objective()
-# solution.visualize_solution()
-algorithm = Algorithm(instance)
-# Set verbosity. Verb = 0: no description 
-verb = 0
-if verb != 0:
-    print('\n****************')
-    print('*   INSTANCE   *')
-    print('****************')
-    print('Number of legs =', len(instance.legs))
-    print('Number of employees =', len(solution.employees))
-    print(f'Number of maximum iterations = {conf.MAX_ITER}')
-    print(f'Tabu tenure = {conf.TABU_LENGTH}')
-    print(f'Starting objective = {solution.evaluation}')
-
-# best_objective, best_solution = algorithm.tabu_search(solution)
-# best_solution.evaluate(instance)
-# best_solution.print_objective()
-# best_solution.print_to_file()
-# best_solution = best_solution.visualize_solution()
-
 
 
 
